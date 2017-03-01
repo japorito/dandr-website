@@ -1,0 +1,28 @@
+{
+  "name": "dandr",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www",
+    "start-production": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.16.0",
+    "connect-ensure-login": "^0.1.1",
+    "connect-memcached": "^0.2.0",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.0",
+    "express": "~4.14.1",
+    "express-session": "^1.15.1",
+    "hbs": "~4.0.1",
+    "less-middleware": "~2.2.0",
+    "mongodb": "^2.2.24",
+    "morgan": "~1.7.0",
+    "passport": "^0.3.2",
+    "passport-google-oauth": "^1.0.0",
+    "serve-favicon": "~2.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
