@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('dandr:server');
 var http = require('http');
 var config = require('../config');
+var db = require('../services/db.js');
 
 /**
  * Get port from environment and store in Express.
@@ -17,18 +18,32 @@ var port = normalizePort(config.port || '3000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * The HTTP server;
  */
+var server;
 
-var server = http.createServer(app);
+db.init(function (err) {
+    if (err) {
+        console.error('Failed to get DB connection: ' + err);
+        console.error('Halting startup...');
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+        // Only finish starting up server if the db connection is found.
+        return;
+    }
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+    /**
+     * Create HTTP server.
+     */
+    server = http.createServer(app);
+
+    /**
+     * Listen on provided port, on all network interfaces.
+     */
+
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+});
 
 /**
  * Normalize a port into a number, string, or false.
@@ -59,9 +74,9 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof port === 'string' ?
+    'Pipe ' + port :
+    'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -84,8 +99,8 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  var bind = typeof addr === 'string' ?
+    'pipe ' + addr :
+    'port ' + addr.port;
   debug('Listening on ' + bind);
 }
