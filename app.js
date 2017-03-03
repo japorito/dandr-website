@@ -75,14 +75,7 @@ app.use(config.googleCredentials.callbackURL,
         })
     );
 
-app.use('/',
-        function(req, res, next) {
-            var db = require('./services/db').db;
-            console.log(db);
-
-            next();
-        },
-        index);
+app.use('/', index);
 app.use('/admin',
         ensureLoggedIn(config.googleCredentials.callbackURL),
         admin);
