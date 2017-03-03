@@ -11,7 +11,6 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var MemcachedStore = require('connect-memcached')(session);
 
 var index = require('./routes/index');
-var users = require('./routes/users');
 var admin = require('./routes/admin');
 
 var config = require('./config');
@@ -57,20 +56,28 @@ passport.use(new GoogleStrategy(config.googleCredentials,
 // from the database when deserializing.  However, due to the fact that this
 // example does not have a database, the complete Facebook profile is serialized
 // and deserialized.
-passport.serializeUser(function(user, cb) {
-  cb(null, user);
+passport.serializeUser(function(user, callback) {
+    var users = require('./services/users');
+
+    users.findUserByGoogleUserObject(user, function(err, dbUser) {
+        callback(err, user.id);
+    });
 });
 
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
+passport.deserializeUser(function(id, callback) {
+    var users = require('./services/users');
+
+    users.findUserByGoogleID(id, function(err, user) {
+        callback(err, user);
+    });
 });
 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(config.googleCredentials.callbackURL,
         passport.authenticate('google', {
-          'scope' : ['openid email'],
-          'failureRedirect' : '/',
+          'scope' : ['email'],
+          'failureRedirect' : '/denied',
           'successReturnToOrRedirect' : '/admin'
         })
     );
