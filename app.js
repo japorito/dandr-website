@@ -123,9 +123,10 @@ app.use(config.googleCredentials.callbackURL,
         })
     );
 
-// Put user object in locals for all requests
+// Put certain objects in locals for all requests
 app.use(function(req, res, next) {
     res.locals.user = req.user;
+    res.locals.sitename = config.sitename;
     next();
 });
 
