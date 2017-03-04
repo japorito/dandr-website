@@ -60,28 +60,50 @@ passport.serializeUser(function(user, callback) {
     var users = require('./services/users');
 
     users.findUserByGoogleUserObject(user, function(err, dbUser) {
-        callback(err, user.id);
+        if (dbUser !== null) {
+            callback(err, user.id);
+        }
+        else {
+            callback(err, '-1');
+        }
     });
 });
 
 passport.deserializeUser(function(id, callback) {
     var users = require('./services/users');
 
-    users.findUserByGoogleID(id, function(err, user) {
-        callback(err, user);
-    });
+    if (id === '-1') {
+        callback(null, {
+            'googleId': '-1',
+            'displayName': 'Unauthorized User',
+            'email': null,
+            'roles': []
+        });
+    }
+    else {
+        users.findUserByGoogleID(id, function(err, user) {
+            callback(err, user);
+        });
+    }
 });
 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(config.googleCredentials.callbackURL,
         passport.authenticate('google', {
-          'scope' : ['email'],
-          'failureRedirect' : '/denied',
-          'successReturnToOrRedirect' : '/admin'
+            'scope' : ['email'],
+            'failureRedirect' : '/denied',
+            'successReturnToOrRedirect' : '/admin'
         })
     );
 
+// Put user object in locals for all requests
+app.use(function(req, res, next) {
+    res.locals.user = req.user;
+    next();
+});
+
+// Actual application routing
 app.use('/', index);
 app.use('/admin',
         ensureLoggedIn(config.googleCredentials.callbackURL),
@@ -89,20 +111,20 @@ app.use('/admin',
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = !config.production ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = !config.production ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 module.exports = app;
