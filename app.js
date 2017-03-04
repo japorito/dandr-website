@@ -5,11 +5,11 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var MemcachedStore = require('connect-memcached')(session);
 var hbs = require('hbs');
+var auth = require('./services/auth');
 
 var index = require('./routes/index');
 var admin = require('./routes/admin');
@@ -22,26 +22,11 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-//Add Custom View helpers
-hbs.registerHelper('permit', function(permission, options) {
-    var _ = require('underscore');
+// Set case sensitive routing
+app.set('case sensitive routing', true);
 
-    if (this.user === null ||
-        this.user === undefined ||
-        this.user.providerId === '-1')
-    {
-        return '';
-    }
-    else if (config.authorization[permission] !== undefined &&
-             _.intersection(config.authorization[permission], this.user.roles).length === 0)
-    {
-        return '';
-    }
-    else
-    {
-        return options.fn(this);
-    }
-});
+//Add Custom View helpers
+hbs.registerHelper('permit', auth.handlebarsHelper);
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -55,7 +40,7 @@ app.use(session({
     resave            : false,
     saveUninitialized : false,
     cookie            : {
-        maxAge : config.sessionLength, //1 hour
+        maxAge : config.sessionLength,
         config : config.secureCookies
     }
 }));
@@ -70,14 +55,6 @@ passport.use(new GoogleStrategy(config.googleCredentials,
 ));
 
 // Configure Passport authenticated session persistence.
-//
-// In order to restore authentication state across HTTP requests, Passport needs
-// to serialize users into and deserialize users out of the session.  In a
-// production-quality application, this would typically be as simple as
-// supplying the user ID when serializing, and querying the user record by ID
-// from the database when deserializing.  However, due to the fact that this
-// example does not have a database, the complete Facebook profile is serialized
-// and deserialized.
 passport.serializeUser(function(user, callback) {
     var users = require('./services/users');
 
@@ -123,6 +100,8 @@ app.use(config.googleCredentials.callbackURL,
         })
     );
 
+app.use(auth.middleware);
+
 // Put certain objects in locals for all requests
 app.use(function(req, res, next) {
     res.locals.user = req.user;
@@ -133,7 +112,6 @@ app.use(function(req, res, next) {
 // Actual application routing
 app.use('/', index);
 app.use('/admin',
-        ensureLoggedIn(config.googleCredentials.callbackURL),
         admin);
 
 // catch 404 and forward to error handler

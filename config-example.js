@@ -21,7 +21,14 @@ module.exports = {
         port : '27017',
         db : 'dandr'
     },
+    // permission name : array of authorized roles
     authorization : {
-        'manage-users' : ['sysadmin', 'siteadmin']
+        'manage-users' : ['sysadmin', 'siteadmin'],
+        'site-administration' : ['sysadmin', 'siteadmin', 'contentcreator']
+    },
+    // path regex : array of permissions to check (at least one must pass)
+    pathPermissions : {
+        '^/admin*': ['site-administration'],
+        '^/admin/users': ['manage-users']
     }
 };
