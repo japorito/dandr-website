@@ -9,6 +9,7 @@ var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var MemcachedStore = require('connect-memcached')(session);
+var hbs = require('hbs');
 
 var index = require('./routes/index');
 var admin = require('./routes/admin');
@@ -20,6 +21,27 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+
+//Add Custom View helpers
+hbs.registerHelper('permit', function(permission, options) {
+    var _ = require('underscore');
+
+    if (this.user === null ||
+        this.user === undefined ||
+        this.user.providerId === '-1')
+    {
+        return '';
+    }
+    else if (config.authorization[permission] !== undefined &&
+             _.intersection(config.authorization[permission], this.user.roles).length === 0)
+    {
+        return '';
+    }
+    else
+    {
+        return options.fn(this);
+    }
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -59,12 +81,15 @@ passport.use(new GoogleStrategy(config.googleCredentials,
 passport.serializeUser(function(user, callback) {
     var users = require('./services/users');
 
-    users.findUserByGoogleUserObject(user, function(err, dbUser) {
+    users.findUserByUserObject(user, function(err, dbUser) {
         if (dbUser !== null) {
-            callback(err, user.id);
+            callback(err, {
+                providerId: user.id,
+                provider: user.provider
+            });
         }
         else {
-            callback(err, '-1');
+            callback(err, {providerId: '-1', provider: 'none'});
         }
     });
 });
@@ -72,16 +97,17 @@ passport.serializeUser(function(user, callback) {
 passport.deserializeUser(function(id, callback) {
     var users = require('./services/users');
 
-    if (id === '-1') {
+    if (id.providerId === '-1') {
         callback(null, {
-            'googleId': '-1',
+            'providerId': '-1',
+            'provider' : 'none',
             'displayName': 'Unauthorized User',
             'email': null,
             'roles': []
         });
     }
     else {
-        users.findUserByGoogleID(id, function(err, user) {
+        users.findUserByProviderId(id.providerId, id.provider, function(err, user) {
             callback(err, user);
         });
     }

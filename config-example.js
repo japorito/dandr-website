@@ -20,4 +20,7 @@ module.exports = {
     },
     production : true,
     port : 443 //HTTPS default
+    authorization : {
+        'manage-users' : ['sysadmin', 'siteadmin']
+    }
 };

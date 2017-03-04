@@ -2,11 +2,11 @@ var db = require('./db').db;
 var users = db.collection('users');
 
 module.exports = {
-    findUserByGoogleID: function(id, callback) {
-        users.findOne({googleId: id}, callback);
+    findUserByProviderId: function(id, provider, callback) {
+        users.findOne({providerId: id, provider: provider}, callback);
     },
 
-    findUserByGoogleUserObject: function(user, callback) {
+    findUserByUserObject: function(user, callback) {
         var emailList = [];
 
         for (var i=0; i<user.emails.length; i++) {
@@ -14,11 +14,11 @@ module.exports = {
             emailList.push(email.value);
         }
 
-        var userQuery = {email: {$in: emailList}};
+        var userQuery = {provider: user.provider, email: {$in: emailList}};
 
         users.findOne(userQuery, function(err, dbUser) {
             if (dbUser !== null &&
-                user.id !== dbUser.googleId)
+                user.id !== dbUser.providerId)
             {
                 //new or changed user
                 console.log('Updating user on login: ', user);
@@ -26,7 +26,8 @@ module.exports = {
                 users.updateOne(userQuery, {
                     $set: {
                         displayName : user.displayName,
-                        googleId : user.id
+                        providerId : user.id,
+                        provider : user.provider
                     }
                 });
             }
@@ -39,8 +40,8 @@ module.exports = {
         users.insertOne(user, callback);
     },
 
-    updateRoles: function(id, roles, callback) {
-        users.updateOne({googleId : id}, {
+    updateRoles: function(id, provider, roles, callback) {
+        users.updateOne({providerId : id, provider: provider}, {
             $set: {
                 roles : roles
             }
