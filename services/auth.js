@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var config = require('../config');
+var config = require('./conf').config;
 
 function authorizePermission(user, permission) {
     return user !== null &&

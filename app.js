@@ -14,7 +14,7 @@ var auth = require('./services/auth');
 var index = require('./routes/index');
 var admin = require('./routes/admin');
 
-var config = require('./config');
+var config = require('./services/conf').config;
 
 var app = express();
 
@@ -105,7 +105,12 @@ app.use(auth.middleware);
 // Put certain objects in locals for all requests
 app.use(function(req, res, next) {
     res.locals.user = req.user;
+
+    // Layout configuration
+    res.locals.socialHeader = config.socialHeader;
     res.locals.sitename = config.sitename;
+
+    // continue
     next();
 });
 

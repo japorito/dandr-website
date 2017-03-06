@@ -2,7 +2,9 @@ var MongoClient = require('mongodb').MongoClient;
 
 function createMongoUrl() {
     var url = 'mongodb://';
-    var conf = require('../config.js').mongoConfig;
+    // This uses the config file directly, as the conf module can't be
+    // initialized fully until a DB connection is established.
+    var conf = require('../config').mongoConfig;
 
     // username and password can be omitted in non-production scenarios.
     if (conf.user !== undefined) {

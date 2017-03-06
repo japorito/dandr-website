@@ -18,12 +18,18 @@
 			<a class="highlight">Highlighted Link</a>
 			<a>Normal Link</a>
 		</div>
+
+		{{#if socialHeader}}
 		<div class="social">
-			<img class="social-icon" src="../images/facebook.png">
-			<img class="social-icon" src="../images/twitter.png">
-			<img class="social-icon" src="../images/rss.png">
-			<img class="social-icon favorite" src="../images/patreon-color.png">
+			{{#each socialHeader}}
+			{{#if this.favorite}}
+			<a class="social-icon favorite" href="{{this.url}}"><img src="../images/{{this.iconset}}-color.png"></a>
+			{{else}}
+			<a class="social-icon" href="{{this.url}}"><img src="../images/{{this.iconset}}.png"></a>
+			{{/if}}
+			{{/each}}
 		</div>
+		{{/if}}
 	</div>
 
 	{{{body}}}

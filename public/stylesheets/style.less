@@ -4,19 +4,21 @@
 @dandr-gold:      #d79104;
 @dandr-nearblack: #0e0d0b;
 
+@header-height: 50px;
+
 body {
 	color: @dandr-nearblack;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	padding-left: 10%;
 	padding-right: 10%;
-	padding-top: 50px;
+	padding-top: @header-height;
 }
 
 /* Header Start */
 .header {
 	position: fixed;
 	width: 100%;
-	height: 50px;
+	height: @header-height;
 	left: 0;
 	top: 0;
 	background: @dandr-nearblack;
@@ -24,7 +26,7 @@ body {
 
 .header-logo {
 	height: 80%;
-	margin: 5px;
+	margin: @header-height * 0.1;
 }
 
 .social {
@@ -51,6 +53,11 @@ body {
 .social-icon.favorite:hover {
 	filter: drop-shadow(0px 0px 10px @dandr-gold);
 	-webkit-filter: drop-shadow(0px 0px 10px @dandr-gold);
+}
+
+.social img {
+	max-height: @header-height;
+	max-width: 100%;
 }
 
 .header-navigation {

@@ -1,21 +1,7 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
-
-var app = require('../app');
-var debug = require('debug')('dandr:server');
-var http = require('http');
-var config = require('../config');
 var db = require('../services/db');
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(config.port || '3000');
-app.set('port', port);
+var app, debug, http;
 
 /**
  * The HTTP server;
@@ -31,18 +17,38 @@ db.init(function (err) {
         return;
     }
 
-    /**
-     * Create HTTP server.
-     */
-    server = http.createServer(app);
+    var conf = require('../services/conf');
 
-    /**
-     * Listen on provided port, on all network interfaces.
-     */
+    // DB connection loaded, initialize configuration
+    conf.initializeConfig(function() {
+        /**
+         * Module dependencies.
+         */
+        app = require('../app');
+        debug = require('debug')('dandr:server');
+        http = require('http');
 
-    server.listen(port);
-    server.on('error', onError);
-    server.on('listening', onListening);
+        var config = conf.config;
+
+        /**
+         * Get port from environment and store in Express.
+         */
+        var port = normalizePort(config.port || '3000');
+        app.set('port', port);
+
+        /**
+         * Create HTTP server.
+         */
+        server = http.createServer(app);
+
+        /**
+         * Listen on provided port, on all network interfaces.
+         */
+
+        server.listen(port);
+        server.on('error', onError);
+        server.on('listening', onListening);
+    });
 });
 
 /**
