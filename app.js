@@ -107,6 +107,7 @@ app.use(function(req, res, next) {
     res.locals.user = req.user;
 
     // Layout configuration
+    res.locals.headerNavigation = config.headerNavigation;
     res.locals.socialHeader = config.socialHeader;
     res.locals.sitename = config.sitename;
 

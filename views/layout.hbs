@@ -11,27 +11,34 @@
 </head>
 <body>
 	<div class="header">
-		<a href="/">
-			<img class="header-logo" src="../images/DnRlogo-mid.png">
-		</a>
-		<div class="header-navigation">
-			<a class="highlight">Highlighted Link</a>
-			<a>Normal Link</a>
-		</div>
+		<nav role="navigation" aria-label="Header Navigation" class="header-navigation">
+			<a class="home" href="/">
+				<img class="header-logo" alt="{{sitename}} Home" src="../images/DnRlogo-mid.png">
+			</a>
+			{{#each headerNavigation}}
+			{{#if menu}}
+			<span class="menu">{{text}}</span>
+			{{else}}
+			<a{{#if favorite}} class="highlight"{{/if}} href="{{url}}">{{text}}</a>
+			{{/if}}
+			{{/each}}
+		</nav>
 
 		{{#if socialHeader}}
 		<div class="social">
 			{{#each socialHeader}}
-			{{#if this.favorite}}
-			<a class="social-icon favorite" href="{{this.url}}"><img src="../images/{{this.iconset}}-color.png"></a>
+			{{#if favorite}}
+			<a class="social-icon favorite" href="{{url}}"><img src="../images/{{iconset}}-color.png"></a>
 			{{else}}
-			<a class="social-icon" href="{{this.url}}"><img src="../images/{{this.iconset}}.png"></a>
+			<a class="social-icon" href="{{url}}"><img src="../images/{{iconset}}.png"></a>
 			{{/if}}
 			{{/each}}
 		</div>
 		{{/if}}
 	</div>
 
+	<main role="main">
 	{{{body}}}
+	</main>
 </body>
 </html>
